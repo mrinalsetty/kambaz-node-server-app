@@ -25,10 +25,12 @@ const sessionOptions = {
 };
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
+  // Production / preview cross-site cookie settings
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
-    domain: process.env.SERVER_URL,
+    // Only set domain if explicitly provided to avoid "undefined" domain
+    ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
   };
 }
 app.use(session(sessionOptions));
