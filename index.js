@@ -45,4 +45,27 @@ ModulesRoutes(app, db);
 AssignmentRoutes(app, db);
 EnrollmentsRoutes(app, db);
 
-app.listen(process.env.PORT || 4000);
+// Root health endpoint for platform health checks
+app.get("/", (req, res) => {
+  res.send({ status: "ok", uptime: process.uptime() });
+});
+
+// Generic error handler to avoid silent crashes
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(500).send({ error: "Server error" });
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+});
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+});
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Kambaz server listening on port ${PORT}`);
+});
