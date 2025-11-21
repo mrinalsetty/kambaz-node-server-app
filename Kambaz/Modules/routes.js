@@ -5,15 +5,42 @@ export default function ModulesRoutes(app, db) {
     res.json(dao.findModulesForCourse(req.params.courseId));
   };
   const createModuleForCourse = (req, res) => {
+    const currentUser = req.session.currentUser;
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+    if (!["FACULTY", "TA", "ADMIN"].includes(currentUser.role)) {
+      res.sendStatus(403);
+      return;
+    }
     const { courseId } = req.params;
     const newModule = dao.createModule({ ...req.body, course: courseId });
     res.json(newModule);
   };
   const deleteModule = (req, res) => {
+    const currentUser = req.session.currentUser;
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+    if (!["FACULTY", "TA", "ADMIN"].includes(currentUser.role)) {
+      res.sendStatus(403);
+      return;
+    }
     dao.deleteModule(req.params.moduleId);
     res.sendStatus(200);
   };
   const updateModule = (req, res) => {
+    const currentUser = req.session.currentUser;
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+    if (!["FACULTY", "TA", "ADMIN"].includes(currentUser.role)) {
+      res.sendStatus(403);
+      return;
+    }
     const updated = dao.updateModule(req.params.moduleId, req.body);
     res.json(updated);
   };
