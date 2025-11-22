@@ -12,6 +12,7 @@ import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(
   cors({
     credentials: true,
@@ -25,18 +26,15 @@ const sessionOptions = {
 };
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
-  // Production / preview cross-site cookie settings
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
-    // Only set domain if explicitly provided to avoid "undefined" domain
     ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
   };
 }
 app.use(session(sessionOptions));
 app.use(express.json());
 
-// Feature routes
 Lab5(app);
 Hello(app);
 UserRoutes(app, db);
