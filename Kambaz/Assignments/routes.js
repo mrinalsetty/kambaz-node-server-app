@@ -5,6 +5,15 @@ export default function AssignmentRoutes(app, db) {
     res.json(dao.findAssignmentsForCourse(req.params.courseId));
   };
   const createAssignmentForCourse = (req, res) => {
+    const currentUser = req.session.currentUser;
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+    if (!["FACULTY", "TA", "ADMIN"].includes(currentUser.role)) {
+      res.sendStatus(403);
+      return;
+    }
     const { courseId } = req.params;
     const newAssignment = dao.createAssignment({
       ...req.body,
@@ -13,10 +22,28 @@ export default function AssignmentRoutes(app, db) {
     res.json(newAssignment);
   };
   const deleteAssignment = (req, res) => {
+    const currentUser = req.session.currentUser;
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+    if (!["FACULTY", "TA", "ADMIN"].includes(currentUser.role)) {
+      res.sendStatus(403);
+      return;
+    }
     dao.deleteAssignment(req.params.assignmentId);
     res.sendStatus(200);
   };
   const updateAssignment = (req, res) => {
+    const currentUser = req.session.currentUser;
+    if (!currentUser) {
+      res.sendStatus(401);
+      return;
+    }
+    if (!["FACULTY", "TA", "ADMIN"].includes(currentUser.role)) {
+      res.sendStatus(403);
+      return;
+    }
     const updated = dao.updateAssignment(req.params.assignmentId, req.body);
     res.json(updated);
   };

@@ -12,6 +12,7 @@ import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(
   cors({
     credentials: true,
@@ -28,13 +29,12 @@ if (process.env.SERVER_ENV !== "development") {
   sessionOptions.cookie = {
     sameSite: "none",
     secure: true,
-    domain: process.env.SERVER_URL,
+    ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
   };
 }
 app.use(session(sessionOptions));
 app.use(express.json());
 
-// Feature routes
 Lab5(app);
 Hello(app);
 UserRoutes(app, db);
@@ -43,4 +43,27 @@ ModulesRoutes(app, db);
 AssignmentRoutes(app, db);
 EnrollmentsRoutes(app, db);
 
-app.listen(process.env.PORT || 4000);
+// Root health endpoint for platform health checks
+app.get("/", (req, res) => {
+  res.send({ status: "ok", uptime: process.uptime() });
+});
+
+// Generic error handler to avoid silent crashes
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  res.status(500).send({ error: "Server error" });
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+});
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+});
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Kambaz server listening on port ${PORT}`);
+});

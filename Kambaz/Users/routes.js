@@ -59,6 +59,7 @@ export default function UserRoutes(app, db) {
   app.post("/api/users/signin", signin);
   app.post("/api/users/signout", signout);
   app.post("/api/users/profile", profile);
+  app.get("/api/users/profile", profile);
   app.put("/api/users/:userId", updateUser);
   app.get("/api/users", findAllUsers);
   app.get("/api/users/:userId", findUserById);

@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 export default function UsersDao(db) {
   let { users } = db;
   const createUser = (user) => {
-    const newUser = { ...user, _id: uuidv4() };
+    const newUser = { role: "STUDENT", ...user, _id: uuidv4() };
     users = [...users, newUser];
     return newUser;
   };
