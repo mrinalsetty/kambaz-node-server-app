@@ -90,6 +90,11 @@ export default function UserRoutes(app) {
     res.json(status);
   };
 
+  const createUser = async (req, res) => {
+    const user = await dao.createUser(req.body);
+    res.json(user);
+  };
+
   app.post("/api/users/signin", signin);
   app.post("/api/users/signup", signup);
   app.post("/api/users/signout", signout);
@@ -99,4 +104,5 @@ export default function UserRoutes(app) {
   app.get("/api/users", findAllUsers);
   app.get("/api/users/:userId", findUserById);
   app.delete("/api/users/:userId", deleteUser);
+  app.post("/api/users", createUser);
 }
