@@ -1,21 +1,27 @@
-import CoursesDao from "./dao.js";
+import dao from "./dao.js";
+
 export default function CourseRoutes(app, db) {
-  const dao = CoursesDao(db);
-  const findAllCourses = (req, res) => res.json(dao.findAllCourses());
-  const findCoursesForEnrolledUser = (req, res) => {
+  const findAllCourses = async (req, res) => {
+    const courses = await dao.findAllCourses();
+    res.json(courses);
+  };
+
+  const findCoursesForEnrolledUser = async (req, res) => {
     let { userId } = req.params;
     if (userId === "current") {
-      const currentUser = req.session.currentUser;
+      const currentUser = req.session.currentUser || req.session["currentUser"];
       if (!currentUser) {
         res.sendStatus(401);
         return;
       }
       userId = currentUser._id;
     }
-    res.json(dao.findCoursesForEnrolledUser(userId));
+    const courses = await dao.findCoursesForEnrolledUser(userId);
+    res.json(courses);
   };
-  const createCourse = (req, res) => {
-    const currentUser = req.session.currentUser;
+
+  const createCourse = async (req, res) => {
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
@@ -24,11 +30,12 @@ export default function CourseRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
-    const newCourse = dao.createCourse(req.body, currentUser._id);
+    const newCourse = await dao.createCourse(req.body, currentUser._id);
     res.json(newCourse);
   };
-  const deleteCourse = (req, res) => {
-    const currentUser = req.session.currentUser;
+
+  const deleteCourse = async (req, res) => {
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
@@ -37,11 +44,12 @@ export default function CourseRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
-    dao.deleteCourse(req.params.courseId);
+    await dao.deleteCourse(req.params.courseId);
     res.sendStatus(200);
   };
-  const updateCourse = (req, res) => {
-    const currentUser = req.session.currentUser;
+
+  const updateCourse = async (req, res) => {
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
@@ -50,7 +58,7 @@ export default function CourseRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
-    const updated = dao.updateCourse(req.params.courseId, req.body);
+    const updated = await dao.updateCourse(req.params.courseId, req.body);
     res.json(updated);
   };
 
