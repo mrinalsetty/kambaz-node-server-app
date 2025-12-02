@@ -19,7 +19,7 @@ export default function CourseRoutes(app, db) {
       }
       userId = currentUser._id;
     }
-    const courses = await dao.findCoursesForEnrolledUser(userId);
+    const courses = await enrollmentsDao.findCoursesForUser(userId);
     res.json(courses);
   };
 
