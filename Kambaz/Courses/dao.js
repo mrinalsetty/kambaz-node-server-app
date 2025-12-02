@@ -20,16 +20,9 @@ const findCoursesForEnrolledUser = async (userId) => {
   return enrolledCourses;
 };
 
-const createCourse = async (course, userId) => {
+const createCourse = async (course) => {
   const newCourse = { ...course, _id: uuidv4() };
-  const createdCourse = await model.create(newCourse);
-
-  db.enrollments = [
-    ...db.enrollments,
-    { _id: uuidv4(), user: userId, course: newCourse._id },
-  ];
-
-  return createdCourse;
+  return model.create(newCourse);
 };
 
 const deleteCourse = async (courseId) => {
