@@ -3,12 +3,13 @@ import model from "./model.js";
 import db from "../Database/index.js";
 
 const findAllCourses = () => {
-  return model.find();
+  return model.find({}, { name: 1, description: 1 });
 };
 
 const findCoursesForEnrolledUser = async (userId) => {
   const { enrollments } = db;
-  const courses = await model.find();
+
+  const courses = await model.find({}, { name: 1, description: 1 });
 
   const enrolledCourses = courses.filter((course) =>
     enrollments.some(
@@ -26,12 +27,14 @@ const createCourse = async (course) => {
 };
 
 const deleteCourse = async (courseId) => {
+  await model.deleteOne({ _id: courseId });
   db.enrollments = db.enrollments.filter((e) => e.course !== courseId);
-  return model.deleteOne({ _id: courseId });
 };
 
 const updateCourse = async (courseId, updates) => {
-  return model.updateOne({ _id: courseId }, { $set: updates });
+  await model.updateOne({ _id: courseId }, { $set: updates });
+  const updatedCourse = await model.findById(courseId);
+  return updatedCourse;
 };
 
 export default {
