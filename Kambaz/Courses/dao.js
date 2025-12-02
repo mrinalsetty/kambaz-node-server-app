@@ -26,14 +26,12 @@ const createCourse = async (course) => {
 };
 
 const deleteCourse = async (courseId) => {
-  await model.deleteOne({ _id: courseId });
   db.enrollments = db.enrollments.filter((e) => e.course !== courseId);
+  return model.deleteOne({ _id: courseId });
 };
 
 const updateCourse = async (courseId, updates) => {
-  await model.updateOne({ _id: courseId }, { $set: updates });
-  const updatedCourse = await model.findById(courseId);
-  return updatedCourse;
+  return model.updateOne({ _id: courseId }, { $set: updates });
 };
 
 export default {
