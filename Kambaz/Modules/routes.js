@@ -1,9 +1,14 @@
 import ModulesDao from "./dao.js";
+
 export default function ModulesRoutes(app, db) {
   const dao = ModulesDao(db);
-  const findModulesForCourse = (req, res) => {
-    res.json(dao.findModulesForCourse(req.params.courseId));
+
+  const findModulesForCourse = async (req, res) => {
+    const { courseId } = req.params;
+    const modules = await dao.findModulesForCourse(courseId);
+    res.json(modules);
   };
+
   const createModuleForCourse = (req, res) => {
     const currentUser = req.session.currentUser;
     if (!currentUser) {
@@ -18,6 +23,7 @@ export default function ModulesRoutes(app, db) {
     const newModule = dao.createModule({ ...req.body, course: courseId });
     res.json(newModule);
   };
+
   const deleteModule = (req, res) => {
     const currentUser = req.session.currentUser;
     if (!currentUser) {
@@ -31,6 +37,7 @@ export default function ModulesRoutes(app, db) {
     dao.deleteModule(req.params.moduleId);
     res.sendStatus(200);
   };
+
   const updateModule = (req, res) => {
     const currentUser = req.session.currentUser;
     if (!currentUser) {
