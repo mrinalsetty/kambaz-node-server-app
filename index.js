@@ -3,6 +3,7 @@ import express from "express";
 import session from "express-session";
 import cors from "cors";
 import mongoose from "mongoose";
+
 import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
 import db from "./Kambaz/Database/index.js";
@@ -18,25 +19,29 @@ const CONNECTION_STRING =
 mongoose
   .connect(CONNECTION_STRING)
   .then(() => {
-    console.log("Connected to MongoDB:", CONNECTION_STRING);
+    console.log("Connected to MongoDB");
   })
   .catch((error) => {
     console.error("Error connecting to MongoDB:", error);
   });
 
 const app = express();
+
 app.set("trust proxy", 1);
+
 app.use(
   cors({
     credentials: true,
     origin: process.env.CLIENT_URL || "http://localhost:3000",
   })
 );
+
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
 };
+
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
   sessionOptions.cookie = {
@@ -45,6 +50,7 @@ if (process.env.SERVER_ENV !== "development") {
     ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
   };
 }
+
 app.use(session(sessionOptions));
 app.use(express.json());
 
