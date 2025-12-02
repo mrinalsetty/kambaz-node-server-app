@@ -9,7 +9,7 @@ export default function ModulesRoutes(app, db) {
     res.json(modules);
   };
 
-  const createModuleForCourse = (req, res) => {
+  const createModuleForCourse = async (req, res) => {
     const currentUser = req.session.currentUser;
     if (!currentUser) {
       res.sendStatus(401);
@@ -19,8 +19,11 @@ export default function ModulesRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
+
     const { courseId } = req.params;
-    const newModule = dao.createModule({ ...req.body, course: courseId });
+    const module = { ...req.body };
+    const newModule = await dao.createModule(courseId, module);
+
     res.json(newModule);
   };
 

@@ -9,9 +9,14 @@ export default function ModulesDao(db) {
     return course?.modules || [];
   };
 
-  const createModule = (module) => {
+  const createModule = async (courseId, module) => {
     const newModule = { ...module, _id: uuidv4() };
-    modules = [...modules, newModule];
+
+    const status = await courseModel.updateOne(
+      { _id: courseId },
+      { $push: { modules: newModule } }
+    );
+
     return newModule;
   };
 
