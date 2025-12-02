@@ -5,7 +5,7 @@ export default function EnrollmentsRoutes(app, db) {
   const findEnrollmentsForUser = (req, res) => {
     let { userId } = req.params;
     if (userId === "current") {
-      const currentUser = req.session.currentUser;
+      const currentUser = req.session.currentUser || req.session["currentUser"];
       if (!currentUser) {
         res.sendStatus(401);
         return;
@@ -15,7 +15,7 @@ export default function EnrollmentsRoutes(app, db) {
     res.json(dao.findEnrollmentsForUser(userId));
   };
   const enrollCurrentUserInCourse = (req, res) => {
-    const currentUser = req.session.currentUser;
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
@@ -25,7 +25,7 @@ export default function EnrollmentsRoutes(app, db) {
     res.json(enrollment);
   };
   const unenrollCurrentUserFromCourse = (req, res) => {
-    const currentUser = req.session.currentUser;
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
