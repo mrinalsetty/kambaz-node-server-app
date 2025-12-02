@@ -27,7 +27,7 @@ export default function ModulesRoutes(app, db) {
     res.json(newModule);
   };
 
-  const deleteModule = (req, res) => {
+  const deleteModule = async (req, res) => {
     const currentUser = req.session.currentUser;
     if (!currentUser) {
       res.sendStatus(401);
@@ -37,8 +37,10 @@ export default function ModulesRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
-    dao.deleteModule(req.params.moduleId);
-    res.sendStatus(200);
+
+    const { courseId, moduleId } = req.params;
+    const status = await dao.deleteModule(courseId, moduleId);
+    res.send(status);
   };
 
   const updateModule = (req, res) => {
@@ -57,6 +59,6 @@ export default function ModulesRoutes(app, db) {
 
   app.get("/api/courses/:courseId/modules", findModulesForCourse);
   app.post("/api/courses/:courseId/modules", createModuleForCourse);
-  app.delete("/api/modules/:moduleId", deleteModule);
+  app.delete("/api/courses/:courseId/modules/:moduleId", deleteModule);
   app.put("/api/modules/:moduleId", updateModule);
 }

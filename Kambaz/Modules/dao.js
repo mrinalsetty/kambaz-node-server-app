@@ -20,8 +20,12 @@ export default function ModulesDao(db) {
     return newModule;
   };
 
-  const deleteModule = (moduleId) => {
-    modules = modules.filter((m) => m._id !== moduleId);
+  const deleteModule = async (courseId, moduleId) => {
+    const status = await courseModel.updateOne(
+      { _id: courseId },
+      { $pull: { modules: { _id: moduleId } } }
+    );
+    return status;
   };
 
   const updateModule = (moduleId, updates) => {
