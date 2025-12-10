@@ -1,13 +1,17 @@
-// Kambaz/Modules/dao.js
 import { v4 as uuidv4 } from "uuid";
 import courseModel from "../Courses/model.js";
+import modulesModel from "./model.js";
 
 export default function ModulesDao(db) {
-  let { modules } = db; // still used nowhere except legacy; fine to keep
+  let { modules } = db;
 
   const findModulesForCourse = async (courseId) => {
     const course = await courseModel.findById(courseId);
-    return course?.modules || [];
+    if (course && Array.isArray(course.modules) && course.modules.length > 0) {
+      return course.modules;
+    }
+    const mods = await modulesModel.find({ course: courseId });
+    return mods || [];
   };
 
   const createModule = async (courseId, module) => {
