@@ -15,12 +15,14 @@ export default function ModulesDao(db) {
   };
 
   const createModule = async (courseId, module) => {
-    const newModule = { ...module, _id: uuidv4() };
+    const newModule = { ...module, _id: uuidv4(), course: courseId };
 
     await courseModel.updateOne(
       { _id: courseId },
       { $push: { modules: newModule } }
     );
+
+    await modulesModel.create(newModule);
 
     return newModule;
   };
@@ -30,6 +32,7 @@ export default function ModulesDao(db) {
       { _id: courseId },
       { $pull: { modules: { _id: moduleId } } }
     );
+    await modulesModel.deleteOne({ _id: moduleId });
     return status;
   };
 
@@ -41,12 +44,14 @@ export default function ModulesDao(db) {
 
     const module = course.modules.id(moduleId);
     if (!module) {
-      return null;
+      await modulesModel.updateOne({ _id: moduleId }, { $set: moduleUpdates });
+      return await modulesModel.findById(moduleId);
     }
 
     Object.assign(module, moduleUpdates);
 
     await course.save();
+    await modulesModel.updateOne({ _id: moduleId }, { $set: moduleUpdates });
     return module;
   };
 
