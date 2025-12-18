@@ -1,28 +1,43 @@
-import { v4 as uuidv4 } from "uuid";
+import model from "./model.js";
+
 export default function EnrollmentsDao(db) {
-  const findAllEnrollments = () => db.enrollments;
-  const findEnrollmentsForUser = (userId) =>
-    db.enrollments.filter((e) => e.user === userId);
-  const enrollUserInCourse = (userId, courseId) => {
-    const existing = db.enrollments.find(
-      (e) => e.user === userId && e.course === courseId
-    );
-    if (existing) {
-      return existing;
-    }
-    const newEnrollment = { _id: uuidv4(), user: userId, course: courseId };
-    db.enrollments = [...db.enrollments, newEnrollment];
-    return newEnrollment;
-  };
-  const unenrollUserFromCourse = (userId, courseId) => {
-    db.enrollments = db.enrollments.filter(
-      (e) => !(e.user === userId && e.course === courseId)
-    );
-  };
+  async function findCoursesForUser(userId) {
+    const enrollments = await model.find({ user: userId }).populate("course");
+    return enrollments.map((enrollment) => enrollment.course);
+  }
+
+  async function findUsersForCourse(courseId) {
+    const enrollments = await model.find({ course: courseId }).populate("user");
+    return enrollments.map((enrollment) => enrollment.user);
+  }
+
+  function enrollUserInCourse(userId, courseId) {
+    return model.create({
+      _id: `${userId}-${courseId}`,
+      user: userId,
+      course: courseId,
+    });
+  }
+
+  function unenrollUserFromCourse(userId, courseId) {
+    return model.deleteOne({ user: userId, course: courseId });
+  }
+
+  function unenrollAllUsersFromCourse(courseId) {
+    return model.deleteMany({ course: courseId });
+  }
+
+  const findAllEnrollments = async () => model.find();
+
+  const findEnrollmentsForUser = async (userId) => model.find({ user: userId });
+
   return {
-    findAllEnrollments,
-    findEnrollmentsForUser,
+    findCoursesForUser,
+    findUsersForCourse,
     enrollUserInCourse,
     unenrollUserFromCourse,
+    unenrollAllUsersFromCourse,
+    findAllEnrollments,
+    findEnrollmentsForUser,
   };
 }

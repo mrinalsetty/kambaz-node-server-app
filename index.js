@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import session from "express-session";
 import cors from "cors";
+import mongoose from "mongoose";
+
 import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
 import db from "./Kambaz/Database/index.js";
@@ -11,19 +13,35 @@ import ModulesRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentRoutes from "./Kambaz/Assignments/routes.js";
 import EnrollmentsRoutes from "./Kambaz/Enrollments/routes.js";
 
+const CONNECTION_STRING =
+  process.env.DATABASE_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kambaz";
+
+mongoose
+  .connect(CONNECTION_STRING)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
+
 const app = express();
+
 app.set("trust proxy", 1);
+
 app.use(
   cors({
     credentials: true,
     origin: process.env.CLIENT_URL || "http://localhost:3000",
   })
 );
+
 const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz",
   resave: false,
   saveUninitialized: false,
 };
+
 if (process.env.SERVER_ENV !== "development") {
   sessionOptions.proxy = true;
   sessionOptions.cookie = {
@@ -32,6 +50,7 @@ if (process.env.SERVER_ENV !== "development") {
     ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
   };
 }
+
 app.use(session(sessionOptions));
 app.use(express.json());
 
@@ -43,12 +62,10 @@ ModulesRoutes(app, db);
 AssignmentRoutes(app, db);
 EnrollmentsRoutes(app, db);
 
-// Root health endpoint for platform health checks
 app.get("/", (req, res) => {
   res.send({ status: "ok", uptime: process.uptime() });
 });
 
-// Generic error handler to avoid silent crashes
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   if (res.headersSent) {
@@ -63,6 +80,7 @@ process.on("unhandledRejection", (reason) => {
 process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
 });
+
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Kambaz server listening on port ${PORT}`);

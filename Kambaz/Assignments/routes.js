@@ -1,11 +1,16 @@
 import AssignmentsDao from "./dao.js";
+
 export default function AssignmentRoutes(app, db) {
   const dao = AssignmentsDao(db);
-  const findAssignmentsForCourse = (req, res) => {
-    res.json(dao.findAssignmentsForCourse(req.params.courseId));
+
+  const findAssignmentsForCourse = async (req, res) => {
+    const { courseId } = req.params;
+    const assignments = await dao.findAssignmentsForCourse(courseId);
+    res.json(assignments);
   };
-  const createAssignmentForCourse = (req, res) => {
-    const currentUser = req.session.currentUser;
+
+  const createAssignmentForCourse = async (req, res) => {
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
@@ -14,15 +19,17 @@ export default function AssignmentRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
+
     const { courseId } = req.params;
-    const newAssignment = dao.createAssignment({
+    const newAssignment = await dao.createAssignment({
       ...req.body,
       course: courseId,
     });
     res.json(newAssignment);
   };
-  const deleteAssignment = (req, res) => {
-    const currentUser = req.session.currentUser;
+
+  const deleteAssignment = async (req, res) => {
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
@@ -31,11 +38,14 @@ export default function AssignmentRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
-    dao.deleteAssignment(req.params.assignmentId);
+
+    const { assignmentId } = req.params;
+    await dao.deleteAssignment(assignmentId);
     res.sendStatus(200);
   };
-  const updateAssignment = (req, res) => {
-    const currentUser = req.session.currentUser;
+
+  const updateAssignment = async (req, res) => {
+    const currentUser = req.session.currentUser || req.session["currentUser"];
     if (!currentUser) {
       res.sendStatus(401);
       return;
@@ -44,7 +54,9 @@ export default function AssignmentRoutes(app, db) {
       res.sendStatus(403);
       return;
     }
-    const updated = dao.updateAssignment(req.params.assignmentId, req.body);
+
+    const { assignmentId } = req.params;
+    const updated = await dao.updateAssignment(assignmentId, req.body);
     res.json(updated);
   };
 
